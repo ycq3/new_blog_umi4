@@ -6,7 +6,6 @@ import {
   Modal,
   Radio,
   Checkbox,
-  Image,
   message,
   Popconfirm,
 } from 'antd';
@@ -360,10 +359,6 @@ export default class MusicPage extends Component<any, MusicState> {
             下载当前列表所有歌曲
           </Button>
         </Input.Group>
-
-        <Image src={require('@/image/wechat.png')} height={'100px'} />
-        <Image src={require('@/image/donate.png')} height={'100px'} />
-
         <Modal
           title="下载确认"
           open={isModalOpen}
