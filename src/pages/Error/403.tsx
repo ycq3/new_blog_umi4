@@ -1,3 +1,3 @@
 export default function () {
-  return <>404</>;
+  return <>403</>;
 }
