@@ -6,13 +6,14 @@ import {
   Modal,
   Radio,
   Checkbox,
-  Image,
   message,
   Popconfirm,
 } from 'antd';
 import type { RadioChangeEvent } from 'antd';
 import React, { Component } from 'react';
 import { request } from 'umi';
+import './index.less';
+import { connect } from 'umi';
 
 // import { FileSystemGetFileOptions } from 'wicg-file-system-access';
 
@@ -22,9 +23,9 @@ export interface Song {
   name: string;
   play_list_id: number;
   quality: number;
-  song_id: number;
   qualityText: string;
   status: string;
+  song_url: string;
 }
 
 interface MusicState {
@@ -32,16 +33,18 @@ interface MusicState {
   currentPage: number;
   pageSize: number;
   total: number;
-  playListId: number;
+  keyword: string;
   isModalOpen: boolean;
   loading: boolean;
   qualitySelect: number;
   emptyCount: number;
   pin: number;
-  verify: boolean;
   isNewListModalOpen: boolean;
 }
 
+@connect(({ Music }) => ({
+  Music,
+}))
 export default class MusicPage extends Component<any, MusicState> {
   public static menu = {
     name: '歌单下载', // 兼容此写法
@@ -55,21 +58,19 @@ export default class MusicPage extends Component<any, MusicState> {
     currentPage: 1,
     pageSize: 15,
     total: 0,
-    playListId: 0,
+    keyword: '',
     isModalOpen: false,
     loading: true,
     qualitySelect: 1,
     emptyCount: 0,
-    verify: false,
     pin: 0,
     isNewListModalOpen: false,
   };
+  private ap: any;
 
   componentDidMount() {
-    if (process.env.NODE_ENV === 'development') {
-      this.setState({ pin: 427485, playListId: 2603575627 });
-    }
-    this.loadPlayList(this.state.playListId);
+    console.log(this.props);
+    this.Search(this.state.keyword);
   }
 
   add(playListId: number) {
@@ -84,21 +85,22 @@ export default class MusicPage extends Component<any, MusicState> {
     });
   }
 
-  loadPlayList(playListId: number) {
-    if (playListId <= 0) {
-      return;
-    }
-    this.setState({ loading: true });
+  async Search(keyword: string) {
+    // if (keyword.length <= 0) {
+    //   return;
+    // }
+    await this.setState({ loading: true });
     const { currentPage, pageSize } = this.state;
-    request('/api/songs/play_list/' + playListId, {
+    await request('/api/music/all', {
       params: {
+        q: keyword,
         page: currentPage,
         pageSize: pageSize,
       },
     }).then((resp) => {
       const { data, total } = resp;
       let emptyCount = 0;
-      data.map((i: Song) => {
+      data?.map((i: Song) => {
         const qualityText = ['FLAC', 'm4a', '320K', '128K', 'ERROR'];
         i.qualityText = qualityText[i.quality - 1] ?? 'ERROR';
         if (i.quality > 4) {
@@ -106,6 +108,26 @@ export default class MusicPage extends Component<any, MusicState> {
         }
         return i;
       });
+
+      //const urlToGet =
+      //       'https://api.dydq.xyz' +
+      //       '/api/song/' +
+      //       s.id +
+      //       '/' +
+      //       s.quality +
+      //       '/download.cache';
+      //       if (this.ap !== null) {
+      //         this.ap.list.add(data.map((i: Song) => {
+      //           return {
+      //             id: i.id,
+      //             name: i.name,
+      //             artist: i.artist,
+      //             url: '/api/song/' + i.id + '/' + 4 + '/download.cache',
+      //             cover: '/api/song/' + i.id + '/cover/download.cache',
+      //             lrc: '/api/song/' + i.id + '/lrc/download.cache',
+      //           };
+      //         }));
+      //       }
 
       this.setState({
         data: data,
@@ -118,7 +140,6 @@ export default class MusicPage extends Component<any, MusicState> {
   }
 
   async download(id: string | number | null = null) {
-    // debugger
     if (this.dirHandle === null) {
       console.log('no permission');
       this.dirHandle = await window.showDirectoryPicker({
@@ -133,7 +154,7 @@ export default class MusicPage extends Component<any, MusicState> {
     // this.dirHandle
 
     if (id !== null && id > 0) {
-      let i = data.find((n) => n.song_id === id);
+      let i = data.find((n) => n.id === id);
       if (i !== undefined) {
         await this.getBlob(i);
       }
@@ -147,13 +168,7 @@ export default class MusicPage extends Component<any, MusicState> {
   }
 
   async getBlob(s: Song) {
-    const urlToGet =
-      'https://api.dydq.xyz' +
-      '/api/song/' +
-      s.id +
-      '/' +
-      s.quality +
-      '/download.cache';
+    const urlToGet = '/api/song/' + s.id + '/' + s.quality + '/download.cache';
     const data = await fetch(urlToGet);
     console.log(urlToGet);
     if (data.status !== 200) {
@@ -210,17 +225,33 @@ export default class MusicPage extends Component<any, MusicState> {
     return (await fileHandle.requestPermission(options)) === 'granted';
   }
 
+  // onInit = (ap: any) => {
+  //   this.ap = ap;
+  // };
+
+  addToPlayer(s: Song) {
+    console.log(s);
+    // const { addPlayList } = useModel('Music');
+    // addPlayList(s);
+  }
+
   render(): React.ReactNode {
-    const dataSource = this.state.data;
+    const {
+      isModalOpen,
+      loading,
+      qualitySelect,
+      emptyCount,
+      keyword,
+      currentPage,
+      pageSize,
+      total,
+      data: dataSource,
+    } = this.state;
 
     const columns = [
       {
-        title: '歌单ID',
-        dataIndex: 'play_list_id',
-      },
-      {
         title: '歌曲ID',
-        dataIndex: 'song_id',
+        dataIndex: 'id',
       },
       {
         title: '歌曲名',
@@ -240,11 +271,11 @@ export default class MusicPage extends Component<any, MusicState> {
       },
       {
         title: '下载',
-        render: (_: any, record: { song_id: number }) =>
+        render: (_: any, record: { id: number }) =>
           dataSource.length >= 1 ? (
             <Popconfirm
               title="确认要下载吗"
-              onConfirm={() => this.download(record.song_id)}
+              onConfirm={() => this.download(record.id)}
             >
               <Button>下载</Button>
             </Popconfirm>
@@ -279,58 +310,24 @@ export default class MusicPage extends Component<any, MusicState> {
     //   //move above
     // }
 
-    const {
-      isModalOpen,
-      loading,
-      qualitySelect,
-      emptyCount,
-      playListId,
-      pin,
-      verify,
-      isNewListModalOpen,
-    } = this.state;
-
     return (
       <div>
-        <h3>由于版权原因，不对外开放,交流请扫码关注公众号</h3>
         <div style={{ display: 'flex' }}>
-          <Input.Group compact style={{ width: '400px' }}>
+          <Input.Group>
             <Input
-              placeholder="输入暗号"
+              placeholder="歌手 or 歌曲名"
               style={{ width: '300px' }}
-              status={'error'}
-              onChange={(e) => this.setState({ pin: Number(e.target.value) })}
-              disabled={verify}
-            />
-            <Button
-              type="primary"
-              onClick={() => {
-                if (pin === 427485) {
-                  this.setState({ verify: true });
-                }
-              }}
-              disabled={verify}
-            >
-              验证
-            </Button>
-          </Input.Group>
-          <Input.Group compact style={{ width: '400px' }}>
-            <Input
-              placeholder="输入歌单ID"
-              style={{ width: '300px' }}
-              disabled={!verify}
               onChange={(e) =>
-                this.setState({ playListId: Number(e.target.value) })
+                this.setState({ keyword: String(e.target.value) })
               }
             />
             <Button
               type="primary"
               onClick={() => {
-                this.loadPlayList(playListId);
+                this.Search(keyword);
               }}
-              disabled={!verify}
             >
-              导入
+              搜索
             </Button>
           </Input.Group>
         </div>
@@ -353,16 +350,12 @@ export default class MusicPage extends Component<any, MusicState> {
           <Checkbox disabled={true}>同时下载歌词</Checkbox>
           <Checkbox disabled={true}>同时下载封面</Checkbox>
           <Button
-            disabled={!verify}
             type="primary"
             onClick={() => this.setState({ isModalOpen: true })}
           >
             下载当前列表所有歌曲
           </Button>
         </Input.Group>
-
-        <Image src={require('@/image/wechat.png')} height={'100px'} />
-        <Image src={require('@/image/donate.png')} height={'100px'} />
 
         <Modal
           title="下载确认"
@@ -384,19 +377,46 @@ export default class MusicPage extends Component<any, MusicState> {
             </p>
           )}
         </Modal>
-        <Modal
-          title="创建导入任务"
-          open={isNewListModalOpen}
-          onCancel={() => this.setState({ isNewListModalOpen: false })}
-          confirmLoading={loading}
-          onOk={() => this.add(playListId)}
-        >
-          <p>歌单不存在需要导入，处理过程需要1-2小时，请勿重复提交</p>
-          <p>
-            服务器流量成本不菲，如果这个工具帮助到了你，你可以捐助我们，一遍我们持续运行
-          </p>
-        </Modal>
-        <Table dataSource={dataSource} columns={columns} rowKey="id" />
+        {/*<Modal*/}
+        {/*  title='创建导入任务'*/}
+        {/*  open={isNewListModalOpen}*/}
+        {/*  onCancel={() => this.setState({ isNewListModalOpen: false })}*/}
+        {/*  confirmLoading={loading}*/}
+        {/*  // onOk={() => this.add(keyword)}*/}
+        {/*>*/}
+        {/*  <p>歌单不存在需要导入，处理过程需要1-2小时，请勿重复提交</p>*/}
+        {/*  <p>*/}
+        {/*    服务器流量成本不菲，如果这个工具帮助到了你，你可以捐助我们，一遍我们持续运行*/}
+        {/*  </p>*/}
+        {/*</Modal>*/}
+        <Table
+          dataSource={dataSource}
+          columns={columns}
+          rowKey="id"
+          loading={loading}
+          pagination={{
+            current: currentPage,
+            defaultCurrent: 1,
+            total: total,
+            pageSize: pageSize,
+            onChange: (page, pageSize) => {
+              this.setState({ pageSize: pageSize, currentPage: page }, () =>
+                this.Search(keyword),
+              );
+            },
+          }}
+          onRow={(record) => {
+            return {
+              onClick: () => {
+                this.addToPlayer(record);
+              }, // 点击行
+              onDoubleClick: () => {},
+              onContextMenu: () => {},
+              onMouseEnter: () => {}, // 鼠标移入行
+              onMouseLeave: () => {},
+            };
+          }}
+        />
       </div>
     );
   }
