@@ -1,6 +1,6 @@
 import { Component } from 'react';
 
-export class M907 extends Component<any, any> {
+export default class M907 extends Component<any, any> {
   render() {
     return (
       <>

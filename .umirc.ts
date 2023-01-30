@@ -1,5 +1,5 @@
 import { defineConfig } from '@umijs/max';
-
+const HOST = 'http://192.168.196.220:9050';
 export default defineConfig({
   antd: {},
   access: {},
@@ -90,18 +90,18 @@ export default defineConfig({
   proxy: {
     '/api/article': {
       headers: { host: 'api.pipiqiang.cn' },
-      target: 'http://127.0.0.1:9050',
+      target: HOST,
     },
     '/api/music': {
-      target: 'http://127.0.0.1:9050',
+      target: HOST,
       headers: { host: 'music.pipiqiang.cn' },
     },
     '/api/movie': {
-      target: 'http://127.0.0.1:9050',
+      target: HOST,
       headers: { host: 'music.pipiqiang.cn' },
     },
     '/api/song': {
-      target: 'http://127.0.0.1:9050',
+      target: HOST,
       headers: { host: 'music.pipiqiang.cn' },
     },
     // '/api': {

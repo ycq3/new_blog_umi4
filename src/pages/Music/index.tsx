@@ -12,7 +12,6 @@ import {
 import type { RadioChangeEvent } from 'antd';
 import React, { Component } from 'react';
 import { request } from 'umi';
-import './index.less';
 import { connect } from 'umi';
 
 // import { FileSystemGetFileOptions } from 'wicg-file-system-access';
