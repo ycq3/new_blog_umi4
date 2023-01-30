@@ -12,7 +12,6 @@ import {
 import type { RadioChangeEvent } from 'antd';
 import React, { Component } from 'react';
 import { request } from 'umi';
-import { WechatQrCode, PinChecker } from '@/components/WechatQrCode';
 
 // import ex from 'umi/dist';
 
@@ -40,7 +39,6 @@ interface MusicState {
   qualitySelect: number;
   emptyCount: number;
   pin: number;
-  verify: boolean;
   isNewListModalOpen: boolean;
 }
 
@@ -62,7 +60,6 @@ export default class MusicPage extends Component<any, MusicState> {
     loading: true,
     qualitySelect: 1,
     emptyCount: 0,
-    verify: false,
     pin: 0,
     isNewListModalOpen: false,
   };
@@ -287,19 +284,16 @@ export default class MusicPage extends Component<any, MusicState> {
       qualitySelect,
       emptyCount,
       playListId,
-      verify,
       isNewListModalOpen,
     } = this.state;
 
     return (
       <div>
         <div style={{ display: 'flex' }}>
-          <PinChecker onPass={() => this.setState({ verify: true })} />
           <Input.Group compact style={{ width: '400px' }}>
             <Input
               placeholder="输入歌单ID"
               style={{ width: '300px' }}
-              disabled={!verify}
               onChange={(e) =>
                 this.setState({ playListId: Number(e.target.value) })
               }
@@ -309,7 +303,6 @@ export default class MusicPage extends Component<any, MusicState> {
               onClick={() => {
                 this.loadPlayList(playListId);
               }}
-              disabled={!verify}
             >
               导入
             </Button>
@@ -334,15 +327,12 @@ export default class MusicPage extends Component<any, MusicState> {
           <Checkbox disabled={true}>同时下载歌词</Checkbox>
           <Checkbox disabled={true}>同时下载封面</Checkbox>
           <Button
-            disabled={!verify}
             type="primary"
             onClick={() => this.setState({ isModalOpen: true })}
           >
             下载当前列表所有歌曲
           </Button>
         </Input.Group>
-
-        <WechatQrCode />
 
         <Modal
           title="下载确认"
