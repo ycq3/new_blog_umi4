@@ -176,7 +176,7 @@ export class MusicSearch extends Component<any, any> {
           columns={columns}
           rowKey="id"
           loading={loading}
-        ></Table>
+        />
       </>
     );
   }

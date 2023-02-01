@@ -1,5 +1,6 @@
 import { defineConfig } from '@umijs/max';
 const HOST = 'http://192.168.196.220:9050';
+// const HOST = 'http://127.0.0.1:9050';
 export default defineConfig({
   antd: {},
   access: {},
