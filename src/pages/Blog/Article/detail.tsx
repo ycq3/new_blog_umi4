@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Row, Col } from 'antd';
 import style from './detail.less';
 import { request } from 'umi';
@@ -18,30 +18,32 @@ export interface Menu {
 export default () => {
   const [content, setContent] = useState('loading ...');
   const [title, setTitle] = useState('loading ...');
-  // const [menus, setMenu] = useReducer(,<Array<Menu>>{});
-  const MenuContex = createContext<Array<Menu>>([]);
+  const [menus, setMenu] = useState<Array<Menu>>([]);
+  {
+    /*const MenuContex = createContext<Array<Menu>>([]);*/
+  }
 
-  let menus = new Array<Menu>();
+  let tmpMenu = new Array<Menu>();
   const { id } = useParams();
   const loadDetail = () => {
-    request(`https://api.pipiqiang.cn/api/article/${id}/detail`).then(
-      (resp) => {
-        console.log(resp);
-        setContent(resp.data.content);
-        setTitle(resp.data.title);
-      },
-    );
+    request(`/api/article/${id}/detail`).then((resp) => {
+      console.log(resp);
+      setContent(resp.data.content);
+      setTitle(resp.data.title);
+    });
   };
   useEffect(() => {
     loadDetail();
   }, []);
 
+  useEffect(() => {
+    setMenu(tmpMenu);
+  });
+
   return (
     <>
       <div className={style.menu}>
-        <MenuContex.Provider value={menus}>
-          <ArticleMenu menus={menus} />
-        </MenuContex.Provider>
+        <ArticleMenu menus={menus} />
       </div>
       <Row>
         <Col offset={4} span={20}>
@@ -51,12 +53,12 @@ export default () => {
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeRaw]}
               components={{
-                h2: ({ ...props }) => {
+                h1: ({ ...props }) => {
                   const { level, children } = props;
                   let p = children.pop();
                   if (p !== undefined && typeof p === 'string') {
                     let item: Menu = { level: level, name: p };
-                    menus.push(item);
+                    tmpMenu.push(item);
                     return <h2 id={item.name}>{item.name}</h2>;
                   } else {
                     console.log(p);

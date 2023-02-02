@@ -31,7 +31,7 @@ export default class ArticleList extends Component<any, ArticleListState> {
   }
 
   loadArticle(page: number) {
-    request('https://api.pipiqiang.cn/api/article/list', {
+    request('/api/article/list', {
       params: {
         page: page,
       },
