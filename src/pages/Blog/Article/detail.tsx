@@ -142,11 +142,13 @@ export default () => {
   let menus = new Array<Menu>();
   const { id } = useParams();
   const loadDetail = () => {
-    request(`/api/article/${id}/detail`).then((resp) => {
-      console.log(resp);
-      setContent(resp.data.content);
-      setTitle(resp.data.title);
-    });
+    request(`https://api.pipiqiang.cn/api/article/${id}/detail`).then(
+      (resp) => {
+        console.log(resp);
+        setContent(resp.data.content);
+        setTitle(resp.data.title);
+      },
+    );
   };
   useEffect(() => {
     loadDetail();
