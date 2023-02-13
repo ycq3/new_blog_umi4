@@ -13,9 +13,11 @@
   "dependencies": {
     "@ant-design/icons": "^4.7.0",
     "@ant-design/pro-components": "^2.0.1",
+    "@types/marked": "^4.0.8",
     "@umijs/max": "^4.0.41",
     "antd": "^5.0.0",
     "jol-player": "^4.0.0",
+    "marked": "^4.2.12",
     "react-aplayer": "^1.0.0",
     "react-markdown": "^8.0.4",
     "react-syntax-highlighter": "^15.5.0",

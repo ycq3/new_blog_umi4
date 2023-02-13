@@ -46,10 +46,12 @@ export default function () {
           try {
             let r = await request('/api/music/search', {
               params: {
-                song: song,
-                artist: artist,
+                artist,
+                song,
                 page: pageT,
                 api: i,
+                fullMatchSong,
+                fullMatchArtist,
               },
             });
             if (r.data !== undefined) {
