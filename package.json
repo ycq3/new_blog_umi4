@@ -18,6 +18,7 @@
     "antd": "^5.0.0",
     "jol-player": "^4.0.0",
     "marked": "^4.2.12",
+    "react-anchor-without-hash": "^2.3.1",
     "react-aplayer": "^1.0.0",
     "react-markdown": "^8.0.4",
     "react-syntax-highlighter": "^15.5.0",
